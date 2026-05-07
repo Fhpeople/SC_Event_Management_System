@@ -1,98 +1,131 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Event Ticketing and Booking System
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+## Project Overview
+This project is an Event Ticketing & Booking System that allows event organizers to create and manage events, customers to book and purchase tickets, and administrators to manage refunds. The system is designed using Clean Architecture and Domain-Driven Design (DDD) to ensure modifiability, scalability, and clear separation of concerns.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Tech stack used in this project:
+- Language: TypeScript
+- Framework: NestJS
+- Database: PostgreSQL
 
-## Description
+## Architecture Overview
+The system follows Clean Architecture, which separates responsibilities into the following four layers.
+- Domain layer: Contains core business entities, value objects, and business rules.
+- Application layer: Handles use cases through application services.
+- Infrastructure layer: Responsible for database and external service implementations.
+- Presentation layer: Handles interaction with users through REST API controllers.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
-## Project setup
-
-```bash
-$ npm install
+## Project Structure
+```
+src/
+ ├── domain/
+ │   ├── event/
+ │   │   ├── event.entity.ts
+ │   │   └── ticket-category.entity.ts
+ │   ├── booking/
+ │   │   ├── booking.entity.ts
+ │   │   └── ticket.entity.ts
+ │   ├── refund/
+ │   │   └── refund.entity.ts
+ │   └── shared/
+ │       └── money.value-object.ts
+ │
+ ├── application/
+ │   └── services/
+ │       ├── event.service.ts
+ │       ├── booking.service.ts
+ │       └── refund.service.ts
+ │
+ ├── infrastructure/
+ │   └── database/
+ │       └── (empty / placeholder)
+ │
+ ├── presentation/
+ │   └── controllers/
+ │       ├── event.controller.ts
+ │       ├── booking.controller.ts
+ │       └── refund.controller.ts
+ │
+ └── main.ts
 ```
 
-## Compile and run the project
+In future iterations, application services will be refactored into commands and queries following the CQRS pattern.
 
-```bash
-# development
-$ npm run start
+## Initial Business Rules
 
-# watch mode
-$ npm run start:dev
+### Event
+- Event end date must be after start date
+- Event capacity must be greater than zero
+- Event must have at least one ticket category before being published
+- Event with status Cancelled cannot be published
 
-# production mode
-$ npm run start:prod
-```
+### Ticket Category
+- Ticket price cannot be negative
+- Ticket quota must be greater than zero
+- Total ticket quota must not exceed event capacity
 
-## Run tests
+### Booking
+- Booking quantity must be greater than zero
+- A customer can't have more than one active booking for the same event
+- Booking must have a payment deadline
 
-```bash
-# unit tests
-$ npm run test
+### Payment
+- Booking can only be paid if status is PendingPayment
+- Payment must match total booking price
+- Booking can't be paid after payment deadline
 
-# e2e tests
-$ npm run test:e2e
+## Initial Domain Model
 
-# test coverage
-$ npm run test:cov
-```
+### Entities
+- Event: represents an event created by an organizer
+- TicketCategory: represents ticket types
+- Booking: represents a ticket reservation
+- Ticket: represents a confirmed ticket after payment
+- Refund: represents a refund request process
 
-## Deployment
+### Value Object
+- Money: represents price with amount and currency
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+### Relationships
+- One Event has many Ticket Categories
+- One Event has many Bookings
+- One Booking generates multiple Tickets
+- One Booking may have one Refund
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+The domain model is designed based on the main business flow:
+Event creation → ticket setup → booking → payment → ticket issuance → refund (if needed).
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
+## Ubiquitous Language Glossary
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+| Term | Meaning |
+|---|---|
+| Event | An activity created and managed by an Event Organizer, which can be attended by customers. |
+| Event Organizer | A user responsible for creating, managing, and controlling events. |
+| Customer | A user who browses events, books tickets, and completes payments. |
+| Gate Officer | A user who verifies and validates tickets during the event check-in process. |
+| Ticket | Proof of attendance generated after a booking is successfully paid. |
+| Ticket Category | A classification of tickets such as Regular, VIP, or Early Bird with specific price and quota. |
+| Ticket Code | A unique identifier assigned to each ticket for validation purposes. |
+| Quota | The maximum number of tickets available for a specific ticket category. |
+| Booking | A temporary reservation made by a customer before completing payment, usually with a time limit. |
+| Pending Payment | A booking status indicating that the payment has not yet been completed. |
+| Paid | A booking status indicating that the payment has been successfully completed. |
+| Expired | A booking status indicating that the payment deadline has passed without completion. |
+| Payment Deadline | The maximum time allowed for completing payment after a booking is created. |
+| Money | A value object representing a monetary amount along with its currency. |
+| Refund | The process of returning payment to a customer under certain conditions. |
+| Sales Period | The time range during which a ticket category is available for purchase. |
+| Check-in | The process of validating a ticket when a participant enters the event venue. |
 
-## Resources
+## Current Progress (Week 8)
+- Define Clean Architecture structure
+- Identify core entities and business rules
+- Create initial domain model
+- Prepare project structure
 
-Check out a few resources that may come in handy when working with NestJS:
+This document represents the initial system design. The design will be incrementally refined and expanded in the following development stages.
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+### Notes
+This project structure represents the initial implementation of Clean Architecture for Week 8.
+At this stage, the project mainly focuses on defining the architectural layers, core entities, and initial business rules.
+More advanced Domain-Driven Design (DDD) patterns such as aggregates, domain events, repositories, commands, and queries will be gradually introduced and refined in the following development stages
