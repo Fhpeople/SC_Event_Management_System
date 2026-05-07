@@ -49,7 +49,10 @@ src/
  └── main.ts
 ```
 
-In future iterations, application services will be refactored into commands and queries following the CQRS pattern.
+This project structure represents the initial implementation of Clean Architecture for Week 8.
+At this stage, the project mainly focuses on defining the architectural layers, core entities, and initial business rules.
+More advanced Domain-Driven Design (DDD) patterns such as aggregates, domain events, repositories, commands, and queries will be gradually introduced and refined in the following development stages
+In future iterations, application services will also be refactored into commands and queries following the CQRS pattern.
 
 ## Initial Business Rules
 
@@ -124,8 +127,3 @@ Event creation → ticket setup → booking → payment → ticket issuance → 
 - Prepare project structure
 
 This document represents the initial system design. The design will be incrementally refined and expanded in the following development stages.
-
-### Notes
-This project structure represents the initial implementation of Clean Architecture for Week 8.
-At this stage, the project mainly focuses on defining the architectural layers, core entities, and initial business rules.
-More advanced Domain-Driven Design (DDD) patterns such as aggregates, domain events, repositories, commands, and queries will be gradually introduced and refined in the following development stages
