@@ -1,6 +1,6 @@
 import { AggregateRoot } from '../shared/aggregate-root.base';
 import { Money } from '../shared/money.value-object';
-import { TicketCategory, TicketCategoryProps } from './ticket-category.entity';
+import { TicketCategory } from './ticket-category.entity';
 import { EventStatus } from './event-status.enum';
 import {
   EventName,
@@ -13,12 +13,14 @@ import {
 import {
   CannotPublishEventError,
   CannotCancelEventError,
+  CannotDisableTicketCategoryError,
   QuotaExceedsCapacityError,
 } from './event.errors';
 import { EventCreatedEvent } from './events/event-created.event';
 import { EventPublishedEvent } from './events/event-published.event';
 import { EventCancelledEvent } from './events/event-cancelled.event';
 import { TicketCategoryCreatedEvent } from './events/ticket-category-created.event';
+import { TicketCategoryDisabledEvent } from './events/ticket-category-disabled.event';
 
 export interface EventProps {
   organizerId: string;
@@ -137,6 +139,28 @@ export class Event extends AggregateRoot {
     this.addDomainEvent(new TicketCategoryCreatedEvent(id, this._id, name, quota, price));
   }
 
+  disableTicketCategory(ticketCategoryId: string): void {
+    if (this.props.status === EventStatus.Completed) {
+      throw new CannotDisableTicketCategoryError('event is already completed');
+    }
+
+    const ticketCategory = this.props.ticketCategories.find(
+      (tc) => tc.getId() === ticketCategoryId,
+    );
+
+    if (!ticketCategory) {
+      throw new CannotDisableTicketCategoryError(
+        `ticket category ${ticketCategoryId} not found`,
+      );
+    }
+
+    ticketCategory.disable();
+
+    this.addDomainEvent(
+      new TicketCategoryDisabledEvent(ticketCategoryId, this._id),
+    );
+  }
+
   publish(): void {
     if (this.props.status === EventStatus.Cancelled) {
       throw new CannotPublishEventError('event is cancelled');
@@ -169,6 +193,8 @@ export class Event extends AggregateRoot {
     }
 
     this.props.status = EventStatus.Cancelled;
+
+    this.props.ticketCategories.forEach((tc) => tc.disable());
 
     this.addDomainEvent(new EventCancelledEvent(this._id, this.props.organizerId));
   }

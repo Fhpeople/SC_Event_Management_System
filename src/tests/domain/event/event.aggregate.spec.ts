@@ -10,6 +10,8 @@ import { EventCreatedEvent } from '../../../domain/event/events/event-created.ev
 import { EventPublishedEvent } from '../../../domain/event/events/event-published.event';
 import { EventCancelledEvent } from '../../../domain/event/events/event-cancelled.event';
 import { TicketCategoryCreatedEvent } from '../../../domain/event/events/ticket-category-created.event';
+import { TicketCategoryDisabledEvent } from '../../../domain/event/events/ticket-category-disabled.event';
+import { CannotDisableTicketCategoryError } from '../../../domain/event/event.errors';
 
 const makeValidEventProps = (): CreateEventProps => ({
   id: 'event-001',
@@ -213,6 +215,76 @@ describe('Event Aggregate', () => {
     it('should throw if event is still Draft', () => {
       const event = Event.create(makeValidEventProps());
       expect(() => event.cancel()).toThrow(CannotCancelEventError);
+    });
+
+    it('should throw if event is Completed', () => {
+      const event = Event.create(makeValidEventProps());
+      addTicketCategory(event);
+      event.publish();
+      (event as any).props.status = EventStatus.Completed;
+      expect(() => event.cancel()).toThrow(CannotCancelEventError);
+    });
+
+    it('should disable all ticket categories when event is cancelled', () => {
+      const event = Event.create(makeValidEventProps());
+      addTicketCategory(event);
+      event.publish();
+      event.cancel();
+      event.ticketCategories.forEach((tc) => {
+        expect(tc.isActive).toBe(false);
+      });
+    });
+
+    it('should disable multiple ticket categories when event is cancelled', () => {
+      const event = Event.create(makeValidEventProps());
+      event.addTicketCategory('tc-001', 'Regular', new Money(150_000, 'IDR'), 100, new Date('2025-08-01'), new Date('2025-08-31'));
+      event.addTicketCategory('tc-002', 'VIP', new Money(300_000, 'IDR'), 50, new Date('2025-08-01'), new Date('2025-08-31'));
+      event.publish();
+      event.cancel();
+      expect(event.ticketCategories[0].isActive).toBe(false);
+      expect(event.ticketCategories[1].isActive).toBe(false);
+    });
+  });
+
+
+  describe('UC5 - disableTicketCategory()', () => {
+    it('should disable a ticket category', () => {
+      const event = Event.create(makeValidEventProps());
+      addTicketCategory(event);
+      event.disableTicketCategory('tc-001');
+      expect(event.ticketCategories[0].isActive).toBe(false);
+    });
+
+    it('should raise TicketCategoryDisabledEvent after disabling', () => {
+      const event = Event.create(makeValidEventProps());
+      addTicketCategory(event);
+      event.pullDomainEvents();
+      event.disableTicketCategory('tc-001');
+      const domainEvents = event.pullDomainEvents();
+      expect(domainEvents).toHaveLength(1);
+      expect(domainEvents[0]).toBeInstanceOf(TicketCategoryDisabledEvent);
+    });
+
+    it('should throw if event is Completed', () => {
+      const event = Event.create(makeValidEventProps());
+      addTicketCategory(event);
+      event.publish();
+      (event as any).props.status = EventStatus.Completed;
+      expect(() => event.disableTicketCategory('tc-001')).toThrow(CannotDisableTicketCategoryError);
+    });
+
+    it('should throw if ticket category id is not found', () => {
+      const event = Event.create(makeValidEventProps());
+      addTicketCategory(event);
+      expect(() => event.disableTicketCategory('tc-999')).toThrow(CannotDisableTicketCategoryError);
+    });
+
+    it('disabled ticket category should still exist for historical purposes', () => {
+      const event = Event.create(makeValidEventProps());
+      addTicketCategory(event);
+      event.disableTicketCategory('tc-001');
+      expect(event.ticketCategories).toHaveLength(1);
+      expect(event.ticketCategories[0].isActive).toBe(false);
     });
   });
 

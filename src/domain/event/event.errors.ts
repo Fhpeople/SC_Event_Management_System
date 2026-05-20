@@ -32,3 +32,10 @@ export class QuotaExceedsCapacityError extends Error {
     this.name = 'QuotaExceedsCapacityError';
   }
 }
+
+export class CannotDisableTicketCategoryError extends Error {
+  constructor(reason: string) {
+    super(`Cannot disable ticket category: ${reason}`);
+    this.name = 'CannotDisableTicketCategoryError';
+  }
+}
