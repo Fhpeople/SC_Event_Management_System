@@ -1,11 +1,11 @@
 import { DomainEvent } from '../../shared/domain-event.base';
 
-export class BookingPaidEvent extends DomainEvent {
+export class RefundApprovedEvent extends DomainEvent {
   constructor(
+    public readonly refundId: string,
     public readonly bookingId: string,
     public readonly customerId: string,
-    public readonly eventId: string,
-    public readonly totalPrice: number,
+    public readonly amount: number,
   ) {
     super();
   }
