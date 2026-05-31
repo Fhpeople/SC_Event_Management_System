@@ -13,4 +13,6 @@ export interface IBookingRepository {
   ): Promise<Booking | null>;
 
   findAllExpired(): Promise<Booking[]>;
+
+  findAllByEventId(eventId: string): Promise<Booking[]>;
 }
