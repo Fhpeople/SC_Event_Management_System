@@ -29,7 +29,7 @@ export class RefundOrmEntity {
   @Column({ type: 'text', nullable: true })
   reason!: string | null;
 
-  @Column({ nullable: true })
+  @Column({ type: 'text', nullable: true })
   paymentReference!: string | null;
 
   @CreateDateColumn()
