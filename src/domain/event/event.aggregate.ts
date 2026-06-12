@@ -54,6 +54,10 @@ export class Event extends AggregateRoot {
     this.props = props;
   }
 
+  static reconstruct( id: string, props: EventProps,): Event {
+  return new Event(id, props);
+  }
+  
   static create(createProps: CreateEventProps): Event {
     const event = new Event(createProps.id, {
       organizerId: createProps.organizerId,
@@ -121,6 +125,7 @@ export class Event extends AggregateRoot {
       (sum, tc) => sum + tc.quota,
       0,
     );
+
     if (currentTotalQuota + quota > this.props.capacity.value) {
       throw new QuotaExceedsCapacityError();
     }

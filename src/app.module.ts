@@ -37,7 +37,10 @@ import { GetSalesReportHandler } from './application/event/queries/get-sales-rep
 import { GetParticipantListHandler } from './application/event/queries/get-participant-list/get-participant-list.query';
 import { GetCustomerTicketsHandler } from './application/ticket/queries/get-customer-tickets/get-customer-tickets.query';
 
+import { EventController } from './presentation/controllers/event.controller';
+
 @Module({
+  controllers: [EventController],
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,

@@ -50,9 +50,9 @@ export class EventRepositoryImpl implements IEventRepository {
       return new TicketCategory(tcOrm.id, {
         name: tcOrm.name,
         price: new Money(Number(tcOrm.price), tcOrm.currency),
-        quota: tcOrm.quota,
-        remainingQuota: tcOrm.remainingQuota,
-        salesPeriod: new SalesPeriod(tcOrm.salesStartDate, tcOrm.salesEndDate),
+        quota: Number(tcOrm.quota),  
+        remainingQuota: Number(tcOrm.remainingQuota),
+        salesPeriod: new SalesPeriod(new Date(tcOrm.salesStartDate), new Date(tcOrm.salesEndDate)),
         isActive: tcOrm.isActive,
       });
     });
@@ -62,8 +62,8 @@ export class EventRepositoryImpl implements IEventRepository {
       name: new EventName(orm.name),
       description: new EventDescription(orm.description),
       location: new EventLocation(orm.location),
-      dates: new EventDates(orm.startDate, orm.endDate),
-      capacity: new EventCapacity(orm.capacity),
+      dates: new EventDates(new Date(orm.startDate), new Date(orm.endDate)),
+      capacity: new EventCapacity(Number(orm.capacity)),
       status: orm.status as EventStatus,
       ticketCategories,
     });
