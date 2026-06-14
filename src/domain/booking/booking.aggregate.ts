@@ -37,6 +37,10 @@ export class Booking extends AggregateRoot {
     this.props = props;
   }
 
+  static reconstruct(id: string, props: BookingProps): Booking {
+  return new Booking(id, props);
+  }
+  
   static create(createProps: CreateBookingProps): Booking {
     const quantity = new TicketQuantity(createProps.quantity);
     const totalPrice = createProps.unitPrice.multiply(createProps.quantity);

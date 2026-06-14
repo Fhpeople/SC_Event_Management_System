@@ -38,9 +38,10 @@ import { GetParticipantListHandler } from './application/event/queries/get-parti
 import { GetCustomerTicketsHandler } from './application/ticket/queries/get-customer-tickets/get-customer-tickets.query';
 
 import { EventController } from './presentation/controllers/event.controller';
+import { BookingController } from './presentation/controllers/booking.controller';
 
 @Module({
-  controllers: [EventController],
+  controllers: [EventController, BookingController],
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
