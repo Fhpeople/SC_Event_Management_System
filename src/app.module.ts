@@ -39,9 +39,10 @@ import { GetCustomerTicketsHandler } from './application/ticket/queries/get-cust
 
 import { EventController } from './presentation/controllers/event.controller';
 import { BookingController } from './presentation/controllers/booking.controller';
+import { TicketController } from './presentation/controllers/ticket.controller';
 
 @Module({
-  controllers: [EventController, BookingController],
+  controllers: [EventController, BookingController, TicketController],
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
@@ -128,9 +129,12 @@ import { BookingController } from './presentation/controllers/booking.controller
     },
     {
       provide: PayBookingHandler,
-      useFactory: (repo: BookingRepositoryImpl) =>
-        new PayBookingHandler(repo),
-      inject: [BookingRepositoryImpl],
+      useFactory: (
+      bookingRepo: BookingRepositoryImpl,
+      eventRepo: EventRepositoryImpl,
+      ticketRepo: TicketRepositoryImpl,
+      ) => new PayBookingHandler(bookingRepo, eventRepo, ticketRepo),
+      inject: [BookingRepositoryImpl, EventRepositoryImpl, TicketRepositoryImpl],
     },
     {
       provide: ExpireBookingHandler,

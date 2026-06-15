@@ -7,6 +7,7 @@ import { TicketOrmEntity } from '../database/orm-entities/ticket.orm-entity';
 import { TicketStatus } from '../../domain/ticket/ticket-status.enum';
 import { TicketCode, CheckInTime } from '../../domain/ticket/ticket.value-objects';
 
+
 @Injectable()
 export class TicketRepositoryImpl implements ITicketRepository {
   constructor(
@@ -21,6 +22,7 @@ export class TicketRepositoryImpl implements ITicketRepository {
     orm.eventId = ticket.eventId;
     orm.ticketCode = ticket.ticketCode.value;
     orm.status = ticket.status;
+    orm.eventStartDate = ticket.eventStartDate;
     orm.checkedInAt = ticket.checkedInAt?.value ?? null;
     return orm;
   }

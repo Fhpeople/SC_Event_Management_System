@@ -30,6 +30,10 @@ export class Ticket extends AggregateRoot {
     this.props = props;
   }
 
+  static reconstruct(id: string, props: TicketProps): Ticket {
+    return new Ticket(id, props);
+  }
+
   static create(createProps: CreateTicketProps): Ticket {
     return new Ticket(createProps.id, {
       bookingId: createProps.bookingId,
@@ -51,7 +55,10 @@ export class Ticket extends AggregateRoot {
   get eventId(): string {
     return this.props.eventId;
   }
-
+  get eventStartDate(): Date {
+    return this.props.eventStartDate;
+  }
+  
   get ticketCode(): TicketCode {
     return this.props.ticketCode;
   }
