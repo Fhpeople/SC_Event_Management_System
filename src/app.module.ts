@@ -40,9 +40,10 @@ import { GetCustomerTicketsHandler } from './application/ticket/queries/get-cust
 import { EventController } from './presentation/controllers/event.controller';
 import { BookingController } from './presentation/controllers/booking.controller';
 import { TicketController } from './presentation/controllers/ticket.controller';
+import { RefundController } from './presentation/controllers/refund.controller';
 
 @Module({
-  controllers: [EventController, BookingController, TicketController],
+  controllers: [EventController, BookingController, TicketController, RefundController],
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,

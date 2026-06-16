@@ -40,7 +40,10 @@ export class Refund extends AggregateRoot {
     this._id = id;
     this.props = props;
   }
-
+  static reconstruct(id: string, props: RefundProps): Refund {
+  return new Refund(id, props);
+  }
+  
   static create(createProps: CreateRefundProps): Refund {
     if (createProps.hasCheckedInTickets) {
       throw new CannotRequestRefundError(
